@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../data/store'
 import { CHANNELS, LOST_REASONS } from '../lib/status'
 import { byChannel, byLostReason, byNiche, computeFunnel, pct } from '../lib/stats'
-import { plusDays } from '../lib/dates'
+import { dateOf, plusDays } from '../lib/dates'
 import { PageTitle, Section } from '../components/ui'
 
 export function Stats() {
@@ -14,7 +14,7 @@ export function Stats() {
   const niches = useMemo(() => Array.from(new Set(prospects.map((p) => p.niche).filter((n): n is string => !!n))).sort(), [prospects])
 
   const filtered = prospects.filter((p) => {
-    if (period !== 'all' && p.created_at.slice(0, 10) < plusDays(-Number(period))) return false
+    if (period !== 'all' && dateOf(p.created_at) < plusDays(-Number(period))) return false
     if (niche && p.niche !== niche) return false
     if (channel && p.channel !== channel) return false
     return true
