@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useStore } from '../data/store'
 import { resetLocalDb } from '../data/localRepo'
-import { RELANCE_DAYS, ROLE_LABEL } from '../lib/status'
+import { RELANCE_DAYS, ROLE_LABEL, WEEKLY_GOALS } from '../lib/status'
 import type { Role } from '../lib/types'
 import { Field, PageTitle, Section } from '../components/ui'
 
@@ -60,6 +60,7 @@ export function Settings() {
           <li>Relances automatiques à J+{RELANCE_DAYS.join(', J+')} après le passage en « Contacté ».</li>
           <li>Une réponse reçue, un RDV ou un devis annule les relances restantes.</li>
           <li>Chaque passage de relais entre vous deux crée une notification.</li>
+          <li>Objectifs d'équipe par semaine (écran Semaine) : {WEEKLY_GOALS.prospects} prospects ajoutés, {WEEKLY_GOALS.videos} vidéos envoyées.</li>
           <li>Mode actuel : <span className="font-medium">{mode === 'local' ? 'démo locale (ce navigateur seulement)' : 'partagé via Supabase'}</span>.</li>
         </ul>
       </Section>

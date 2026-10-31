@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { BarChart3, Bell, Home, Kanban, Plus, Settings, Users } from 'lucide-react'
+import { BarChart3, Bell, CalendarDays, Home, Kanban, Plus, Settings, Users } from 'lucide-react'
 import { useStore } from '../data/store'
 import { APP_NAME, ICON_URL, ROLE_LABEL } from '../lib/status'
 import { ago, todayStr } from '../lib/dates'
@@ -8,6 +8,7 @@ import { Avatar } from './ui'
 
 const NAV = [
   { to: '/', label: "Aujourd'hui", icon: Home, end: true },
+  { to: '/semaine', label: 'Semaine', icon: CalendarDays, end: false },
   { to: '/pipeline', label: 'Pipeline', icon: Kanban, end: false },
   { to: '/clients', label: 'Clients', icon: Users, end: false },
   { to: '/stats', label: 'Stats', icon: BarChart3, end: false },
@@ -146,9 +147,9 @@ export function Layout() {
         </main>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
-        {NAV.slice(0, 2).map((n) => (
-          <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => `flex flex-col items-center gap-0.5 py-2 text-[11px] ${isActive ? 'text-slate-900' : 'text-slate-400'}`}>
+      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
+        {NAV.slice(0, 3).map((n) => (
+          <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => `flex flex-col items-center gap-0.5 py-2 text-[10px] ${isActive ? 'text-slate-900' : 'text-slate-400'}`}>
             <n.icon size={20} />
             {n.label}
           </NavLink>
@@ -158,8 +159,8 @@ export function Layout() {
             <Plus size={22} />
           </span>
         </NavLink>
-        {NAV.slice(2, 4).map((n) => (
-          <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => `flex flex-col items-center gap-0.5 py-2 text-[11px] ${isActive ? 'text-slate-900' : 'text-slate-400'}`}>
+        {NAV.slice(3, 5).map((n) => (
+          <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => `flex flex-col items-center gap-0.5 py-2 text-[10px] ${isActive ? 'text-slate-900' : 'text-slate-400'}`}>
             <n.icon size={20} />
             {n.label}
           </NavLink>

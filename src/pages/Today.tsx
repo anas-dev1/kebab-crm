@@ -1,50 +1,15 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BellRing, Check, ExternalLink, Phone, Video, PencilRuler, CalendarCheck, Repeat, CircleDot } from 'lucide-react'
+import { BellRing } from 'lucide-react'
 import { useStore } from '../data/store'
-import { fmtDate, fmtDateLong, isOverdue, isToday, plusDays, todayStr } from '../lib/dates'
+import { dateOf, fmtDateLong, plusDays, todayStr } from '../lib/dates'
 import { STATUS } from '../lib/status'
-import type { Task, TaskType } from '../lib/types'
-import { Empty, PageTitle, Section, StatusBadge } from '../components/ui'
-
-const TASK_ICON: Record<TaskType, typeof Check> = {
-  relance: Repeat, maquette: PencilRuler, video: Video, appel: Phone, rdv: CalendarCheck, autre: CircleDot,
-}
-
-function TaskRow({ task, onDone }: { task: Task; onDone: () => void }) {
-  const { prospects } = useStore()
-  const p = prospects.find((x) => x.id === task.prospect_id)
-  const Icon = TASK_ICON[task.type]
-  const late = isOverdue(task.due_date)
-  return (
-    <li className="flex items-center gap-3 py-2.5">
-      <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${late ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600'}`}>
-        <Icon size={18} />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-medium">{task.title}</p>
-        <p className="flex flex-wrap items-center gap-x-2 text-xs text-slate-500">
-          {p && <StatusBadge status={p.status} />}
-          {p?.city && <span>{p.city}</span>}
-          <span className={late ? 'font-medium text-rose-600' : ''}>
-            {late ? `En retard (${fmtDate(task.due_date)})` : isToday(task.due_date) ? "Aujourd'hui" : fmtDate(task.due_date)}
-          </span>
-        </p>
-      </div>
-      {p && (
-        <Link to={`/prospects/${p.id}`} className="btn btn-ghost btn-sm" title="Ouvrir la fiche">
-          <ExternalLink size={14} />
-        </Link>
-      )}
-      <button type="button" className="btn btn-primary btn-sm" onClick={onDone} title="Marquer comme fait">
-        <Check size={14} /> Fait
-      </button>
-    </li>
-  )
-}
+import { notableEvents } from '../lib/week'
+import { Empty, PageTitle, Section } from '../components/ui'
+import { EventRow, TaskRow } from '../components/rows'
 
 export function Today() {
-  const { me, tasks, prospects, profiles, completeTask } = useStore()
+  const { me, tasks, prospects, profiles, activities, completeTask } = useStore()
   const [notifPerm, setNotifPerm] = useState(typeof Notification !== 'undefined' ? Notification.permission : 'denied')
   const today = todayStr()
   if (!me) return null
@@ -53,6 +18,8 @@ export function Today() {
   const due = mine.filter((t) => t.due_date <= today)
   const upcoming = mine.filter((t) => t.due_date > today && t.due_date <= plusDays(7))
   const other = profiles.find((p) => p.id !== me.id)
+  const doneToday = tasks.filter((t) => t.assigned_to === me.id && t.done_at && dateOf(t.done_at) === today).sort((a, b) => b.done_at!.localeCompare(a.done_at!))
+  const eventsToday = notableEvents(activities).filter((e) => e.user_id === me.id && e.day === today).reverse()
 
   const open = prospects.filter((p) => p.status !== 'gagne' && p.status !== 'perdu')
   const count = (...s: (typeof open)[number]['status'][]) => open.filter((p) => s.includes(p.status)).length
@@ -111,6 +78,21 @@ export function Today() {
           <ul className="divide-y divide-slate-100">
             {upcoming.map((t) => (
               <TaskRow key={t.id} task={t} onDone={() => void completeTask(t)} />
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      <Section title={`Fait aujourd'hui (${doneToday.length + eventsToday.length})`}>
+        {doneToday.length + eventsToday.length === 0 ? (
+          <p className="text-sm text-slate-500">Rien coché ni envoyé pour l'instant.</p>
+        ) : (
+          <ul className="divide-y divide-slate-100">
+            {doneToday.map((t) => (
+              <TaskRow key={t.id} task={t} />
+            ))}
+            {eventsToday.map((e) => (
+              <EventRow key={e.id} event={e} />
             ))}
           </ul>
         )}

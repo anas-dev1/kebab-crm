@@ -1,4 +1,4 @@
-import { addDays, format, formatDistanceToNowStrict, parseISO } from 'date-fns'
+import { addDays, format, formatDistanceToNowStrict, parseISO, startOfWeek } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
 export const nowIso = () => new Date().toISOString()
@@ -10,4 +10,18 @@ export const fmtDateTime = (s: string) => format(parseISO(s), "d MMM 'à' HH:mm"
 export const ago = (s: string) => formatDistanceToNowStrict(parseISO(s), { locale: fr, addSuffix: true })
 export const isOverdue = (due: string) => due < todayStr()
 export const isToday = (due: string) => due === todayStr()
-export const dateOf = (iso: string) => iso.slice(0, 10)
+// Jour local (yyyy-MM-dd) d'un horodatage ISO : ne pas découper la chaîne, elle est en UTC.
+export const dateOf = (iso: string) => format(parseISO(iso), 'yyyy-MM-dd')
+
+// Semaine du lundi au dimanche. `offset` = 0 pour la semaine en cours, -1 la précédente, etc.
+export const weekStartStr = (offset = 0) => format(addDays(startOfWeek(new Date(), { weekStartsOn: 1 }), offset * 7), 'yyyy-MM-dd')
+export const shiftDays = (s: string, n: number) => format(addDays(parseISO(s), n), 'yyyy-MM-dd')
+export const weekDays = (start: string) => Array.from({ length: 7 }, (_, i) => shiftDays(start, i))
+export const fmtDayShort = (s: string) => format(parseISO(s), 'EEE d', { locale: fr })
+export const fmtWeekRange = (start: string) => {
+  const a = parseISO(start)
+  const b = addDays(a, 6)
+  const sameMonth = a.getMonth() === b.getMonth()
+  return `${format(a, sameMonth ? 'd' : 'd MMM', { locale: fr })} – ${format(b, 'd MMM yyyy', { locale: fr })}`
+}
+export const fmtTime = (iso: string) => format(parseISO(iso), 'HH:mm')

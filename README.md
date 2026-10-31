@@ -64,7 +64,8 @@ Une **réponse reçue** (bouton sur la fiche) annule les relances restantes et p
 
 ### Les écrans
 
-- **Aujourd'hui** : mes tâches du jour et en retard, les 7 prochains jours, ce qui est chez l'autre.
+- **Aujourd'hui** : mes tâches du jour et en retard, les 7 prochains jours, ce que j'ai fait aujourd'hui, ce qui est chez l'autre.
+- **Semaine** : grille lundi → dimanche avec les tâches à faire (cochables), celles faites et les événements marquants (vidéo envoyée, réponse, RDV, devis, gagné, perdu). Filtre moi / l'autre / les deux, bandeau des retards, détail d'un jour au clic, bilan chiffré par personne et jauges d'objectifs hebdo (`WEEKLY_GOALS` dans `src/lib/status.ts`).
 - **Pipeline** : colonnes par statut, filtres par niche et par personne. Vue liste sur mobile.
 - **Fiche prospect** : prochaine étape (boutons selon le statut), tâches, journal, infos, brief de maquette, liens maquette et vidéo.
 - **Clients** : les prospects gagnés, par étape de production, avec le récurrent mensuel.

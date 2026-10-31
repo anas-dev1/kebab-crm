@@ -3,6 +3,7 @@ import { useStore } from './data/store'
 import { Layout } from './components/Layout'
 import { Login } from './pages/Login'
 import { Today } from './pages/Today'
+import { Week } from './pages/Week'
 import { Pipeline } from './pages/Pipeline'
 import { ProspectNew } from './pages/ProspectNew'
 import { ProspectDetail } from './pages/ProspectDetail'
@@ -27,6 +28,7 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<Today />} />
+        <Route path="semaine" element={<Week />} />
         <Route path="pipeline" element={<Pipeline />} />
         <Route path="prospects/nouveau" element={<ProspectNew />} />
         <Route path="prospects/:id" element={<ProspectDetail />} />

@@ -51,3 +51,6 @@ export const ROLE_LABEL: Record<Role, string> = { vendeur: 'Vendeur', dev: 'Dev'
 
 export const RELANCE_DAYS = [3, 7, 14]
 export const MONTHLY_FEE = 39
+
+// Objectifs d'équipe par semaine, affichés en jauge sur l'écran Semaine (10 prospects par jour ouvré).
+export const WEEKLY_GOALS = { prospects: 50, videos: 25 }
