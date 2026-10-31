@@ -377,7 +377,7 @@ export function ProspectDetail() {
                 </p>
               </div>
             ) : (
-              <p className="text-sm text-slate-400">Pas de brief. Le vendeur le remplit avant de demander la maquette.</p>
+              <p className="text-sm text-slate-400">Pas de brief. À remplir avant de demander la maquette.</p>
             )}
             <form
               className="mt-3 flex gap-2"
@@ -513,7 +513,7 @@ function UrlDialog({ open, onClose, initial, onSubmit }: { open: boolean; onClos
   const [url, setUrl] = useState(initial)
   return (
     <Dialog open={open} onClose={onClose} title="Maquette prête">
-      <DialogForm onCancel={onClose} submitLabel="Prévenir le vendeur" onSubmit={() => onSubmit(url.trim())}>
+      <DialogForm onCancel={onClose} submitLabel="Maquette prête" onSubmit={() => onSubmit(url.trim())}>
         <Field label="Lien de la maquette" hint="Une adresse que le prospect pourra ouvrir sur son téléphone après la vidéo.">
           <input className="input" required value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://nom-du-prospect.votredomaine.fr" autoFocus />
         </Field>

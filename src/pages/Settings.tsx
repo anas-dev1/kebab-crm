@@ -29,7 +29,7 @@ export function Settings() {
           <Field label="Prénom">
             <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
           </Field>
-          <Field label="Rôle" hint="Le vendeur reçoit les vidéos et les relances, le dev reçoit les demandes de maquette et les clients signés.">
+          <Field label="Rôle" hint="Le compte Dev reçoit les demandes de maquette et les clients signés. Les tâches commerciales (vidéos, relances, RDV) vont à celui qui agit, quel que soit son rôle.">
             <select className="input" value={role} onChange={(e) => setRole(e.target.value as Role)}>
               <option value="vendeur">{ROLE_LABEL.vendeur}</option>
               <option value="dev">{ROLE_LABEL.dev}</option>
@@ -57,6 +57,7 @@ export function Settings() {
 
       <Section title="Fonctionnement">
         <ul className="list-disc space-y-1 pl-5 text-sm text-slate-600">
+          <li>Les tâches vont à la personne qui agit (prospection, vidéo, relances), la maquette au compte Dev ; une fois prête, le prospect revient à celui qui l'a demandée.</li>
           <li>Relances automatiques à J+{RELANCE_DAYS.join(', J+')} après le passage en « Contacté ».</li>
           <li>Une réponse reçue, un RDV ou un devis annule les relances restantes.</li>
           <li>Chaque passage de relais entre vous deux crée une notification.</li>

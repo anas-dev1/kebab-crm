@@ -46,17 +46,19 @@ L'appli est installable (PWA) : dans Chrome, icône « Installer » dans la barr
 
 ### Les statuts du pipeline
 
+Les tâches sont attribuées **à la personne**, pas au rôle : chacun peut prospecter, envoyer des vidéos et relancer. Un prospect appartient à celui qui le crée ; les tâches commerciales vont à celui qui fait l'action ; la maquette va au compte « Dev » et, une fois prête, le prospect revient à celui qui l'avait demandée.
+
 | Statut | Qui a la main | Ce qui se passe automatiquement |
 |---|---|---|
-| Nouveau | Vendeur | — |
-| Qualifié | Vendeur | — |
+| Nouveau | Le créateur | — |
+| Qualifié | Celui qui qualifie | — |
 | Maquette demandée | Dev | Le brief est enregistré, tâche « Maquette » pour le dev, notification au dev |
 | Maquette en cours | Dev | — |
-| Maquette prête | Vendeur | Tâche « Vidéo + envoi » pour le vendeur, notification au vendeur |
-| Contacté | Vendeur | 3 relances créées à J+3, J+7, J+14 |
-| En attente | Vendeur | Passage automatique après la première relance faite |
-| Rendez-vous | Vendeur | Relances annulées, tâche RDV, notification au dev |
-| Devis envoyé | Vendeur | Relances annulées, une relance devis à J+3 |
+| Maquette prête | Celui qui a demandé la maquette | Tâche « Vidéo + envoi » et notification pour lui |
+| Contacté | Celui qui a envoyé la vidéo | 3 relances créées pour lui à J+3, J+7, J+14 |
+| En attente | Idem | Passage automatique après la première relance faite |
+| Rendez-vous | Celui qui a pris le RDV | Relances annulées, tâche RDV, notification à l'autre |
+| Devis envoyé | Idem | Relances annulées, une relance devis à J+3 |
 | Gagné | Dev | Toutes les tâches annulées, étape client « Éléments à recevoir », notification au dev |
 | Perdu | — | Toutes les tâches annulées, motif obligatoire |
 

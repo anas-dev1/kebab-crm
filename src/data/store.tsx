@@ -103,11 +103,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const briefOf = (prospectId: string) => snap.briefs.find((b) => b.prospect_id === prospectId)
     const meId = me?.id ?? null
 
-    const ownerFor = (role: Role) => byRole(role)?.id ?? meId
+    // Attribution « par personne » : les tâches commerciales vont à celui qui fait l'action,
+    // la maquette va au compte dev, et le prospect revient à celui qui a demandé la maquette.
+    const devId = () => byRole('dev')?.id ?? meId
+    // Celui qui suit le prospect côté commercial : le demandeur de la maquette, sinon le créateur, sinon le vendeur.
+    const sellerOf = (p: Prospect) => briefOf(p.id)?.requested_by ?? p.created_by ?? byRole('vendeur')?.id ?? meId
 
-    async function notify(role: Role, title: string, body: string | null, prospectId: string | null) {
-      let targets = profiles.filter((p) => p.role === role && p.id !== meId)
-      if (targets.length === 0) targets = profiles.filter((p) => p.id !== meId)
+    // Notifie une personne précise (jamais soi-même) ou tout le monde sauf soi ('others').
+    async function notify(target: string | null | 'others', title: string, body: string | null, prospectId: string | null) {
+      const targets = target === 'others' ? profiles.filter((p) => p.id !== meId) : profiles.filter((p) => p.id === target && p.id !== meId)
       for (const t of targets) {
         await repo.insert('notifications', { user_id: t.id, prospect_id: prospectId, title, body, read_at: null })
       }
@@ -140,33 +144,35 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       switch (status) {
         case 'nouveau':
           patch.lost_reason = null
-          patch.owner_id = ownerFor('vendeur')
+          patch.owner_id = meId
           break
         case 'qualifie':
-          patch.owner_id = ownerFor('vendeur')
+          patch.owner_id = meId
           break
         case 'maquette_demandee':
-          patch.owner_id = ownerFor('dev')
+          patch.owner_id = devId()
           await cancelTasks(p.id, ['maquette'])
-          await addTaskRaw(p.id, ownerFor('dev'), 'maquette', `Maquette : ${name}`, todayStr())
-          await notify('dev', `Maquette demandée : ${name}`, 'Le brief est rempli, à toi de jouer.', p.id)
+          await addTaskRaw(p.id, devId(), 'maquette', `Maquette : ${name}`, todayStr())
+          await notify(devId(), `Maquette demandée : ${name}`, 'Le brief est rempli, à toi de jouer.', p.id)
           break
         case 'maquette_en_cours':
-          patch.owner_id = ownerFor('dev')
+          patch.owner_id = meId
           break
-        case 'maquette_prete':
-          patch.owner_id = ownerFor('vendeur')
+        case 'maquette_prete': {
+          const back = sellerOf(p)
+          patch.owner_id = back
           await closeTasks(p.id, ['maquette'])
           await cancelTasks(p.id, ['video'])
-          await addTaskRaw(p.id, ownerFor('vendeur'), 'video', `Vidéo + envoi : ${name}`, todayStr())
-          await notify('vendeur', `Maquette prête : ${name}`, patch.mockup_url ?? p.mockup_url ?? null, p.id)
+          await addTaskRaw(p.id, back, 'video', `Vidéo + envoi : ${name}`, todayStr())
+          await notify(back, `Maquette prête : ${name}`, patch.mockup_url ?? p.mockup_url ?? null, p.id)
           break
+        }
         case 'contacte': {
-          patch.owner_id = ownerFor('vendeur')
+          patch.owner_id = meId
           await closeTasks(p.id, ['video'])
           await cancelTasks(p.id, ['relance'])
           for (let i = 0; i < RELANCE_DAYS.length; i++) {
-            await addTaskRaw(p.id, ownerFor('vendeur'), 'relance', `Relance ${i + 1}/${RELANCE_DAYS.length} : ${name}`, plusDays(RELANCE_DAYS[i]))
+            await addTaskRaw(p.id, meId, 'relance', `Relance ${i + 1}/${RELANCE_DAYS.length} : ${name}`, plusDays(RELANCE_DAYS[i]))
           }
           const ch = patch.channel ?? p.channel
           if (ch) details.push(CHANNELS[ch])
@@ -175,26 +181,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         case 'en_attente':
           break
         case 'rdv': {
-          patch.owner_id = ownerFor('vendeur')
+          patch.owner_id = meId
           await cancelTasks(p.id, ['relance'])
           const when = patch.meeting_at ?? p.meeting_at
           if (when) {
-            await addTaskRaw(p.id, ownerFor('vendeur'), 'rdv', `RDV : ${name}`, dateOf(when))
-            await notify('dev', `RDV pris : ${name}`, note ?? null, p.id)
+            await addTaskRaw(p.id, meId, 'rdv', `RDV : ${name}`, dateOf(when))
+            await notify('others', `RDV pris : ${name}`, note ?? null, p.id)
           }
           break
         }
         case 'devis_envoye':
           await cancelTasks(p.id, ['relance'])
-          await addTaskRaw(p.id, ownerFor('vendeur'), 'relance', `Relance devis : ${name}`, plusDays(3))
+          await addTaskRaw(p.id, meId, 'relance', `Relance devis : ${name}`, plusDays(3))
           if (patch.quote_amount != null) details.push(`${patch.quote_amount} €`)
           break
         case 'gagne':
           await cancelTasks(p.id)
           patch.client_stage = 'elements_a_recevoir'
-          patch.owner_id = ownerFor('dev')
-          await addTaskRaw(p.id, ownerFor('dev'), 'autre', `Récupérer les éléments : ${name}`, todayStr())
-          await notify('dev', `Vendu : ${name} 🎉`, 'Le client est à toi : éléments à récupérer, puis production.', p.id)
+          patch.owner_id = devId()
+          await addTaskRaw(p.id, devId(), 'autre', `Récupérer les éléments : ${name}`, todayStr())
+          await notify(devId(), `Vendu : ${name} 🎉`, 'Le client est à toi : éléments à récupérer, puis production.', p.id)
           break
         case 'perdu': {
           await cancelTasks(p.id)
@@ -244,7 +250,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           client_stage: null, notes: null, mockup_url: null, video_url: null, meeting_at: null, quote_amount: null,
           ...input,
           status: 'nouveau',
-          owner_id: ownerFor('vendeur'),
+          owner_id: meId,
           created_by: meId,
           updated_at: nowIso(),
         })
@@ -322,7 +328,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         await cancelTasks(p.id, ['relance'])
         await activity(p.id, 'reponse', content)
         await repo.update('prospects', p.id, { updated_at: nowIso() })
-        await notify(me?.role === 'dev' ? 'vendeur' : 'dev', `Réponse de ${p.business_name}`, content, p.id)
+        await notify('others', `Réponse de ${p.business_name}`, content, p.id)
         await refresh()
       },
 
