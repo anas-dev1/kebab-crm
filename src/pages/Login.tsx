@@ -51,10 +51,10 @@ export function Login() {
               configure Supabase (voir le fichier README).
             </p>
             <button type="button" className="btn btn-accent w-full" onClick={() => void repo.signIn('vendeur', '')}>
-              Entrer comme vendeur (ton ami)
+              Vendeur (Thiffen)
             </button>
             <button type="button" className="btn btn-primary w-full" onClick={() => void repo.signIn('dev', '')}>
-              Entrer comme dev (toi)
+              Dev (Anas)
             </button>
           </div>
         ) : (

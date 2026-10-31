@@ -11,9 +11,24 @@ const authListeners = new Set<(u: AuthUser | null) => void>()
 
 function readDb(): LocalDb {
   const raw = localStorage.getItem(DB_KEY)
-  if (raw) return JSON.parse(raw) as LocalDb
+  if (raw) return migrate(JSON.parse(raw) as LocalDb)
   const db = seed()
   localStorage.setItem(DB_KEY, JSON.stringify(db))
+  return db
+}
+
+// Les anciennes démos avaient des noms génériques : on les remplace par les prénoms actuels.
+const OLD_NAMES = new Set(['Ton ami', 'Toi'])
+function migrate(db: LocalDb): LocalDb {
+  let changed = false
+  for (const ref of [LOCAL_VENDEUR, LOCAL_DEV]) {
+    const prof = db.profiles.find((x) => x.id === ref.id)
+    if (prof && OLD_NAMES.has(prof.name)) {
+      prof.name = ref.name
+      changed = true
+    }
+  }
+  if (changed) localStorage.setItem(DB_KEY, JSON.stringify(db))
   return db
 }
 

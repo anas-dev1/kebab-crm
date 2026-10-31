@@ -10,8 +10,8 @@ export interface LocalDb {
   notifications: Notification[]
 }
 
-export const LOCAL_VENDEUR: Profile = { id: 'u-vendeur', name: 'Ton ami', role: 'vendeur', email: null, created_at: '2026-01-01T00:00:00.000Z' }
-export const LOCAL_DEV: Profile = { id: 'u-dev', name: 'Toi', role: 'dev', email: null, created_at: '2026-01-01T00:00:00.000Z' }
+export const LOCAL_VENDEUR: Profile = { id: 'u-vendeur', name: 'Thiffen', role: 'vendeur', email: null, created_at: '2026-01-01T00:00:00.000Z' }
+export const LOCAL_DEV: Profile = { id: 'u-dev', name: 'Anas', role: 'dev', email: null, created_at: '2026-01-01T00:00:00.000Z' }
 
 const daysAgo = (n: number, hour = 10) => {
   const d = new Date()
