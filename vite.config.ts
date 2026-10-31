@@ -3,7 +3,9 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vite'
 
+// BASE_PATH='/kebab-crm/' pour GitHub Pages (voir .github/workflows/deploy.yml), '/' sinon.
 export default defineConfig({
+  base: process.env.BASE_PATH ?? '/',
   plugins: [
     react(),
     tailwindcss(),

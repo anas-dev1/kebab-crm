@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { BarChart3, Bell, Home, Kanban, Plus, Settings, Users } from 'lucide-react'
 import { useStore } from '../data/store'
-import { APP_NAME, ROLE_LABEL } from '../lib/status'
+import { APP_NAME, ICON_URL, ROLE_LABEL } from '../lib/status'
 import { ago, todayStr } from '../lib/dates'
 import { Avatar } from './ui'
 
@@ -100,7 +100,7 @@ export function Layout() {
     <div className="min-h-screen">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col bg-slate-900 p-4 text-white md:flex">
         <div className="mb-6 flex items-center gap-2 px-1">
-          <img src="/icon.svg" alt="" className="h-8 w-8" />
+          <img src={ICON_URL} alt="" className="h-8 w-8" />
           <span className="text-lg font-bold tracking-tight">{APP_NAME}</span>
         </div>
         <NavLink to="/prospects/nouveau" className="btn btn-accent mb-5 w-full">
@@ -131,7 +131,7 @@ export function Layout() {
       <div className="md:pl-60">
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-slate-100/90 px-4 py-2 backdrop-blur md:justify-end">
           <div className="flex items-center gap-2 md:hidden">
-            <img src="/icon.svg" alt="" className="h-7 w-7" />
+            <img src={ICON_URL} alt="" className="h-7 w-7" />
             <span className="font-bold">{APP_NAME}</span>
           </div>
           <div className="flex items-center gap-2">

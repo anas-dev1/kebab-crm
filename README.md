@@ -29,6 +29,12 @@ Ouvre http://localhost:5173. Sans configuration Supabase, l'appli tourne en **mo
 
 ## Mettre en ligne (pour y accéder depuis n'importe quel PC)
 
+### GitHub Pages (en place)
+
+Chaque push sur `master` déclenche `.github/workflows/deploy.yml`, qui construit l'appli avec `BASE_PATH=/kebab-crm/` et la publie sur https://anas-dev1.github.io/kebab-crm/. Pour passer en mode partagé, ajoute les deux secrets du dépôt (**Settings > Secrets and variables > Actions**) : `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY`, puis relance le workflow. Sans ces secrets, le site en ligne tourne en mode démo.
+
+### Vercel ou Netlify
+
 L'appli est un site statique. Sur Vercel ou Netlify : importe le dossier (ou le dépôt Git), commande de build `npm run build`, dossier de sortie `dist`, et ajoute les deux variables d'environnement `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY`. Pour les routes (`/pipeline`, `/prospects/...`), configure une réécriture de toutes les URL vers `index.html` :
 
 - Vercel : fichier `vercel.json` avec `{ "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }`

@@ -1,6 +1,8 @@
 import type { ActivityType, Channel, ClientStage, LostReason, Role, Status, TaskType } from './types'
 
 export const APP_NAME = 'Kebab CRM'
+// Chemin de l'icône, valable aussi quand l'appli est servie sous un sous-dossier (GitHub Pages).
+export const ICON_URL = `${import.meta.env.BASE_URL}icon.svg`
 
 export const STATUS_ORDER: Status[] = [
   'nouveau', 'qualifie', 'maquette_demandee', 'maquette_en_cours', 'maquette_prete',

@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { repo } from './index'
 import { EMPTY_SNAPSHOT, type AuthUser, type Snapshot } from './repo'
 import type { ActivityType, ClientStage, MockupBrief, Profile, Prospect, Role, Status, Task, TaskType } from '../lib/types'
-import { CHANNELS, CLIENT_STAGES, LOST_REASONS, RELANCE_DAYS, STATUS } from '../lib/status'
+import { CHANNELS, CLIENT_STAGES, ICON_URL, LOST_REASONS, RELANCE_DAYS, STATUS } from '../lib/status'
 import { dateOf, nowIso, plusDays, todayStr } from '../lib/dates'
 
 export type ProspectInput = Partial<Omit<Prospect, 'id' | 'created_at'>> & { business_name: string }
@@ -88,7 +88,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       seen.add(n.id)
       if (!n.read_at && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
         try {
-          new Notification(n.title, { body: n.body ?? undefined, icon: '/icon.svg' })
+          new Notification(n.title, { body: n.body ?? undefined, icon: ICON_URL })
         } catch {
           /* ignore */
         }

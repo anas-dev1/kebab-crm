@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { repo } from '../data'
-import { APP_NAME } from '../lib/status'
+import { APP_NAME, ICON_URL } from '../lib/status'
 import { Field } from '../components/ui'
 import type { Role } from '../lib/types'
 
@@ -37,7 +37,7 @@ export function Login() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="card w-full max-w-md p-6 sm:p-8">
         <div className="mb-6 flex items-center gap-3">
-          <img src="/icon.svg" alt="" className="h-10 w-10" />
+          <img src={ICON_URL} alt="" className="h-10 w-10" />
           <div>
             <h1 className="text-xl font-bold">{APP_NAME}</h1>
             <p className="text-sm text-slate-500">Prospection à deux : maquettes, vidéos, relances.</p>
