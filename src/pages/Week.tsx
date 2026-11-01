@@ -112,7 +112,7 @@ function DayCell({
 }
 
 export function Week() {
-  const { me, profiles, tasks, prospects, activities, completeTask, moveTask } = useStore()
+  const { me, profiles, tasks, prospects, activities, completeTask, moveTask, reassignTask } = useStore()
   const goals = weeklyGoals(useSettings())
   const [offset, setOffset] = useState(0)
   const [who, setWho] = useState<Who>('me')
@@ -145,6 +145,7 @@ export function Week() {
 
   if (!me) return null
   const move = (t: Task) => (due: string) => void moveTask(t, due)
+  const reassign = (t: Task) => (to: string) => void reassignTask(t, to)
   const sel = selected && days.includes(selected) ? byDay(selected) : null
   const whoBtn = (k: Who, label: string) => (
     <button
@@ -193,7 +194,7 @@ export function Week() {
           </p>
           <ul className="divide-y divide-slate-100">
             {overdue.map((t) => (
-              <TaskRow key={t.id} task={t} onDone={() => void completeTask(t)} onMove={move(t)} />
+              <TaskRow key={t.id} task={t} onDone={() => void completeTask(t)} onMove={move(t)} onReassign={reassign(t)} />
             ))}
           </ul>
         </div>
@@ -219,7 +220,7 @@ export function Week() {
                   <p className="mb-1 text-xs font-semibold text-slate-500">À faire ({sel.todo.length})</p>
                   <ul className="divide-y divide-slate-100">
                     {sel.todo.map((t) => (
-                      <TaskRow key={t.id} task={t} onDone={() => void completeTask(t)} onMove={move(t)} />
+                      <TaskRow key={t.id} task={t} onDone={() => void completeTask(t)} onMove={move(t)} onReassign={reassign(t)} />
                     ))}
                   </ul>
                 </div>

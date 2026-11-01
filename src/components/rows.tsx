@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  CalendarCheck, CalendarDays, Check, CircleDot, ExternalLink, FileText, MessageCircle, PencilRuler, Phone, Repeat, Trophy, Video, XCircle,
+  ArrowRightLeft, CalendarCheck, CalendarDays, Check, CircleDot, ExternalLink, FileText, MessageCircle, PencilRuler, Phone, Repeat, Trophy, Video, XCircle,
 } from 'lucide-react'
 import { useStore } from '../data/store'
 import { dateOf, fmtDate, fmtTime, isOverdue, isToday } from '../lib/dates'
@@ -23,8 +23,36 @@ export const EVENT_COLOR: Record<EventKind, string> = {
   perdu: 'bg-rose-100 text-rose-700',
 }
 
+// Bouton « Confier à … » : passe une tâche en attente à une autre personne de l'équipe.
+// À deux, c'est un simple bouton vers l'autre ; à plus, un petit menu déroulant.
+export function ReassignButton({ task, onReassign }: { task: Task; onReassign: (toId: string) => void }) {
+  const { profiles } = useStore()
+  const others = profiles.filter((x) => x.id !== task.assigned_to)
+  if (task.done_at || others.length === 0) return null
+  if (others.length === 1) {
+    return (
+      <button type="button" className="btn btn-ghost btn-sm" onClick={() => onReassign(others[0].id)} title={`Confier à ${others[0].name}`}>
+        <ArrowRightLeft size={14} /> <span className="hidden sm:inline">{others[0].name}</span>
+      </button>
+    )
+  }
+  return (
+    <select className="input w-auto py-1 text-xs" value="" onChange={(e) => e.target.value && onReassign(e.target.value)} title="Confier à…">
+      <option value="">Confier à…</option>
+      {others.map((o) => (
+        <option key={o.id} value={o.id}>
+          {o.name}
+        </option>
+      ))}
+    </select>
+  )
+}
+
 // `onMove` : permet de décaler la tâche à un autre jour (petit sélecteur de date en ligne).
-export function TaskRow({ task, onDone, onMove }: { task: Task; onDone?: () => void; onMove?: (due: string) => void }) {
+// `onReassign` : permet de confier la tâche à quelqu'un d'autre.
+export function TaskRow({
+  task, onDone, onMove, onReassign,
+}: { task: Task; onDone?: () => void; onMove?: (due: string) => void; onReassign?: (toId: string) => void }) {
   const { prospects, profiles } = useStore()
   const [moving, setMoving] = useState(false)
   const p = prospects.find((x) => x.id === task.prospect_id)
@@ -32,8 +60,9 @@ export function TaskRow({ task, onDone, onMove }: { task: Task; onDone?: () => v
   const done = !!task.done_at
   const late = !done && isOverdue(task.due_date)
   const who = profiles.find((x) => x.id === task.assigned_to)
+  // Sur petit écran, les boutons passent à la ligne sous le titre plutôt que de l'écraser.
   return (
-    <li className="flex items-center gap-3 py-2.5">
+    <li className="flex flex-wrap items-center gap-x-3 gap-y-2 py-2.5">
       <span
         className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
           done ? 'bg-emerald-50 text-emerald-600' : late ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600'
@@ -41,7 +70,7 @@ export function TaskRow({ task, onDone, onMove }: { task: Task; onDone?: () => v
       >
         {done ? <Check size={18} /> : <Icon size={18} />}
       </span>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 basis-40">
         <p className={`truncate font-medium ${done ? 'text-slate-400 line-through' : ''}`}>{task.title}</p>
         <p className="flex flex-wrap items-center gap-x-2 text-xs text-slate-500">
           {p && <StatusBadge status={p.status} />}
@@ -55,36 +84,39 @@ export function TaskRow({ task, onDone, onMove }: { task: Task; onDone?: () => v
           )}
         </p>
       </div>
-      <Avatar profile={who} />
-      {p && (
-        <Link to={`/prospects/${p.id}`} className="btn btn-ghost btn-sm" title="Ouvrir la fiche">
-          <ExternalLink size={14} />
-        </Link>
-      )}
-      {!done && onMove && (
-        moving ? (
-          <input
-            type="date"
-            className="input w-auto py-1 text-xs"
-            autoFocus
-            defaultValue={task.due_date}
-            onBlur={() => setMoving(false)}
-            onChange={(e) => {
-              if (e.target.value) onMove(e.target.value)
-              setMoving(false)
-            }}
-          />
-        ) : (
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setMoving(true)} title="Déplacer à un autre jour">
-            <CalendarDays size={14} />
+      <div className="ml-auto flex items-center gap-1">
+        <Avatar profile={who} />
+        {p && (
+          <Link to={`/prospects/${p.id}`} className="btn btn-ghost btn-sm" title="Ouvrir la fiche">
+            <ExternalLink size={14} />
+          </Link>
+        )}
+        {!done && onReassign && <ReassignButton task={task} onReassign={onReassign} />}
+        {!done && onMove && (
+          moving ? (
+            <input
+              type="date"
+              className="input w-auto py-1 text-xs"
+              autoFocus
+              defaultValue={task.due_date}
+              onBlur={() => setMoving(false)}
+              onChange={(e) => {
+                if (e.target.value) onMove(e.target.value)
+                setMoving(false)
+              }}
+            />
+          ) : (
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setMoving(true)} title="Déplacer à un autre jour">
+              <CalendarDays size={14} />
+            </button>
+          )
+        )}
+        {!done && onDone && (
+          <button type="button" className="btn btn-primary btn-sm" onClick={onDone} title="Marquer comme fait">
+            <Check size={14} /> Fait
           </button>
-        )
-      )}
-      {!done && onDone && (
-        <button type="button" className="btn btn-primary btn-sm" onClick={onDone} title="Marquer comme fait">
-          <Check size={14} /> Fait
-        </button>
-      )}
+        )}
+      </div>
     </li>
   )
 }

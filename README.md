@@ -64,6 +64,8 @@ Les tâches sont attribuées **à la personne**, pas au rôle : chacun peut pros
 
 Une **réponse reçue** (bouton sur la fiche) annule les relances restantes et prévient l'autre personne.
 
+Toute tâche en attente peut être **confiée à l'autre** (bouton ⇄ sur la tâche, dans Aujourd'hui, Semaine et la fiche) : elle change de personne, le prospect la suit, et l'autre reçoit une notification. Il n'y a jamais deux tâches « Vidéo + envoi » en attente pour un même prospect, donc jamais deux vidéos pour le même patron.
+
 ### Les écrans
 
 - **Aujourd'hui** : mes tâches du jour et en retard, les 7 prochains jours, ce que j'ai fait aujourd'hui, ce qui est chez l'autre.

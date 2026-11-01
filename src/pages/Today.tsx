@@ -9,7 +9,7 @@ import { Empty, PageTitle, Section } from '../components/ui'
 import { EventRow, TaskRow } from '../components/rows'
 
 export function Today() {
-  const { me, tasks, prospects, profiles, activities, completeTask } = useStore()
+  const { me, tasks, prospects, profiles, activities, completeTask, reassignTask } = useStore()
   const [notifPerm, setNotifPerm] = useState(typeof Notification !== 'undefined' ? Notification.permission : 'denied')
   const today = todayStr()
   if (!me) return null
@@ -65,7 +65,7 @@ export function Today() {
         ) : (
           <ul className="divide-y divide-slate-100">
             {due.map((t) => (
-              <TaskRow key={t.id} task={t} onDone={() => void completeTask(t)} />
+              <TaskRow key={t.id} task={t} onDone={() => void completeTask(t)} onReassign={(to) => void reassignTask(t, to)} />
             ))}
           </ul>
         )}
@@ -77,7 +77,7 @@ export function Today() {
         ) : (
           <ul className="divide-y divide-slate-100">
             {upcoming.map((t) => (
-              <TaskRow key={t.id} task={t} onDone={() => void completeTask(t)} />
+              <TaskRow key={t.id} task={t} onDone={() => void completeTask(t)} onReassign={(to) => void reassignTask(t, to)} />
             ))}
           </ul>
         )}

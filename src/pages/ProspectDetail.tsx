@@ -11,6 +11,7 @@ import type { ActivityType, Channel, ClientStage, LostReason, Prospect, Status, 
 import { Avatar, Dialog, Empty, Field, Section, StatusBadge } from '../components/ui'
 import { ProspectForm } from '../components/ProspectForm'
 import { BriefForm } from '../components/BriefForm'
+import { ReassignButton } from '../components/rows'
 
 type DialogKind = null | 'brief' | 'maquette_prete' | 'contacte' | 'reponse' | 'rdv' | 'devis' | 'gagne' | 'perdu' | 'statut' | 'edit' | 'tache' | 'supprimer'
 
@@ -224,6 +225,7 @@ export function ProspectDetail() {
                           {profileOf(t.assigned_to)?.name ?? 'non assigné'}
                         </p>
                       </div>
+                      <ReassignButton task={t} onReassign={(to) => void store.reassignTask(t, to)} />
                       <button type="button" className="btn btn-ghost btn-sm" title="Supprimer" onClick={() => void store.removeTask(t.id)}>
                         <Trash2 size={14} />
                       </button>

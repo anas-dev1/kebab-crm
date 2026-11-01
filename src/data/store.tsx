@@ -31,6 +31,7 @@ export interface StoreValue extends Snapshot {
   addTask: (prospectId: string, assignedTo: string | null, type: TaskType, title: string, due: string) => Promise<void>
   removeTask: (id: string) => Promise<void>
   moveTask: (t: Task, due: string) => Promise<void>
+  reassignTask: (t: Task, toId: string) => Promise<void>
   planVideos: (assignments: { prospectId: string; due: string }[], assignedTo: string) => Promise<void>
   logActivity: (prospectId: string, type: ActivityType, content: string) => Promise<void>
   markResponse: (p: Prospect, content: string) => Promise<void>
@@ -331,6 +332,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       async moveTask(t, due) {
         if (due === t.due_date) return
         await repo.update('tasks', t.id, { due_date: due })
+        await refresh()
+      },
+
+      // Confier une tâche en attente à l'autre : la tâche change de personne, le prospect la suit, l'autre est prévenu.
+      async reassignTask(t, toId) {
+        if (toId === t.assigned_to || t.done_at) return
+        const to = profiles.find((x) => x.id === toId)
+        await repo.update('tasks', t.id, { assigned_to: toId })
+        await repo.update('prospects', t.prospect_id, { owner_id: toId, updated_at: nowIso() })
+        await activity(t.prospect_id, 'autre', `Confiée à ${to?.name ?? '?'} : ${t.title}`)
+        const from = profiles.find((x) => x.id === meId)
+        await notify(toId, t.title, `Confiée par ${from?.name ?? '?'}, à faire ${t.due_date === todayStr() ? "aujourd'hui" : `le ${fmtDate(t.due_date)}`}.`, t.prospect_id)
         await refresh()
       },
 
