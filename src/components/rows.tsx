@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  CalendarCheck, Check, CircleDot, ExternalLink, FileText, MessageCircle, PencilRuler, Phone, Repeat, Trophy, Video, XCircle,
+  CalendarCheck, CalendarDays, Check, CircleDot, ExternalLink, FileText, MessageCircle, PencilRuler, Phone, Repeat, Trophy, Video, XCircle,
 } from 'lucide-react'
 import { useStore } from '../data/store'
 import { dateOf, fmtDate, fmtTime, isOverdue, isToday } from '../lib/dates'
@@ -22,8 +23,10 @@ export const EVENT_COLOR: Record<EventKind, string> = {
   perdu: 'bg-rose-100 text-rose-700',
 }
 
-export function TaskRow({ task, onDone }: { task: Task; onDone?: () => void }) {
+// `onMove` : permet de décaler la tâche à un autre jour (petit sélecteur de date en ligne).
+export function TaskRow({ task, onDone, onMove }: { task: Task; onDone?: () => void; onMove?: (due: string) => void }) {
   const { prospects, profiles } = useStore()
+  const [moving, setMoving] = useState(false)
   const p = prospects.find((x) => x.id === task.prospect_id)
   const Icon = TASK_ICON[task.type]
   const done = !!task.done_at
@@ -57,6 +60,25 @@ export function TaskRow({ task, onDone }: { task: Task; onDone?: () => void }) {
         <Link to={`/prospects/${p.id}`} className="btn btn-ghost btn-sm" title="Ouvrir la fiche">
           <ExternalLink size={14} />
         </Link>
+      )}
+      {!done && onMove && (
+        moving ? (
+          <input
+            type="date"
+            className="input w-auto py-1 text-xs"
+            autoFocus
+            defaultValue={task.due_date}
+            onBlur={() => setMoving(false)}
+            onChange={(e) => {
+              if (e.target.value) onMove(e.target.value)
+              setMoving(false)
+            }}
+          />
+        ) : (
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setMoving(true)} title="Déplacer à un autre jour">
+            <CalendarDays size={14} />
+          </button>
+        )
       )}
       {!done && onDone && (
         <button type="button" className="btn btn-primary btn-sm" onClick={onDone} title="Marquer comme fait">

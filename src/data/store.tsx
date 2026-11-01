@@ -3,7 +3,8 @@ import { repo } from './index'
 import { EMPTY_SNAPSHOT, type AuthUser, type Snapshot } from './repo'
 import type { ActivityType, ClientStage, MockupBrief, Profile, Prospect, Role, Status, Task, TaskType } from '../lib/types'
 import { CHANNELS, CLIENT_STAGES, ICON_URL, LOST_REASONS, RELANCE_DAYS, STATUS } from '../lib/status'
-import { dateOf, nowIso, plusDays, todayStr } from '../lib/dates'
+import { dateOf, fmtDate, nowIso, plusDays, todayStr } from '../lib/dates'
+import { PLANNABLE_STATUSES } from '../lib/plan'
 
 export type ProspectInput = Partial<Omit<Prospect, 'id' | 'created_at'>> & { business_name: string }
 export type BriefInput = Partial<Omit<MockupBrief, 'id' | 'created_at' | 'prospect_id'>>
@@ -29,6 +30,8 @@ export interface StoreValue extends Snapshot {
   completeTask: (t: Task) => Promise<void>
   addTask: (prospectId: string, assignedTo: string | null, type: TaskType, title: string, due: string) => Promise<void>
   removeTask: (id: string) => Promise<void>
+  moveTask: (t: Task, due: string) => Promise<void>
+  planVideos: (assignments: { prospectId: string; due: string }[], assignedTo: string) => Promise<void>
   logActivity: (prospectId: string, type: ActivityType, content: string) => Promise<void>
   markResponse: (p: Prospect, content: string) => Promise<void>
   setClientStage: (p: Prospect, stage: ClientStage) => Promise<void>
@@ -302,6 +305,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             await repo.update('prospects', p.id, { status: 'en_attente', updated_at: nowIso() })
             await activity(p.id, 'statut', `${STATUS.contacte.label} → ${STATUS.en_attente.label}`, 'en_attente')
           }
+        } else if (t.type === 'video') {
+          // Vidéo envoyée : le prospect passe en « Contacté », avec ses relances (setStatus rafraîchit).
+          await activity(t.prospect_id, 'video', 'Vidéo envoyée')
+          if (p && PLANNABLE_STATUSES.includes(p.status)) {
+            await setStatus(p, 'contacte')
+            return
+          }
         } else {
           await activity(t.prospect_id, 'autre', `Tâche faite : ${t.title}`)
         }
@@ -315,6 +325,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
       async removeTask(id) {
         await repo.remove('tasks', id)
+        await refresh()
+      },
+
+      async moveTask(t, due) {
+        if (due === t.due_date) return
+        await repo.update('tasks', t.id, { due_date: due })
+        await refresh()
+      },
+
+      // Planification en bloc : une tâche « Vidéo + envoi » par prospect, au jour choisi, pour une personne.
+      async planVideos(assignments, assignedTo) {
+        const days: string[] = []
+        let n = 0
+        for (const { prospectId, due } of assignments) {
+          const p = snap.prospects.find((x) => x.id === prospectId)
+          if (!p) continue
+          await cancelTasks(p.id, ['video'])
+          await addTaskRaw(p.id, assignedTo, 'video', `Vidéo + envoi : ${p.business_name}`, due)
+          days.push(due)
+          n++
+        }
+        if (n > 0 && assignedTo !== meId) {
+          days.sort()
+          const range = days[0] === days[n - 1] ? `le ${fmtDate(days[0])}` : `du ${fmtDate(days[0])} au ${fmtDate(days[n - 1])}`
+          await notify(assignedTo, `${n} vidéo(s) planifiée(s) pour toi`, `À faire ${range}`, n === 1 ? assignments[0].prospectId : null)
+        }
         await refresh()
       },
 

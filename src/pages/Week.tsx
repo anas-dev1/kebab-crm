@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AlertTriangle, Check, ChevronLeft, ChevronRight } from 'lucide-react'
+import { AlertTriangle, Check, ChevronLeft, ChevronRight, ListChecks } from 'lucide-react'
 import { useStore } from '../data/store'
 import { dateOf, fmtDateLong, fmtDayShort, fmtWeekRange, todayStr, weekDays, weekStartStr } from '../lib/dates'
-import { WEEKLY_GOALS } from '../lib/status'
+import { unplanned } from '../lib/plan'
+import { useSettings, weeklyGoals } from '../lib/settings'
 import { notableEvents, summarize, type NotableEvent, type PeriodSummary } from '../lib/week'
 import type { Profile, Task } from '../lib/types'
 import { Empty, PageTitle, Section } from '../components/ui'
@@ -111,7 +112,8 @@ function DayCell({
 }
 
 export function Week() {
-  const { me, profiles, tasks, prospects, activities, completeTask } = useStore()
+  const { me, profiles, tasks, prospects, activities, completeTask, moveTask } = useStore()
+  const goals = weeklyGoals(useSettings())
   const [offset, setOffset] = useState(0)
   const [who, setWho] = useState<Who>('me')
   const [selected, setSelected] = useState<string | null>(todayStr())
@@ -139,8 +141,10 @@ export function Week() {
   const rows = [...profiles.map((p) => ({ label: p.name, s: summarize(data, start, end, p.id) })), { label: 'Équipe', s: summarize(data, start, end, null) }]
   const team = rows[rows.length - 1].s
   const weekTodo = tasks.filter((t) => seesTask(t) && !t.done_at && t.due_date >= start && t.due_date <= end).length
+  const toPlan = unplanned(prospects, tasks).length
 
   if (!me) return null
+  const move = (t: Task) => (due: string) => void moveTask(t, due)
   const sel = selected && days.includes(selected) ? byDay(selected) : null
   const whoBtn = (k: Who, label: string) => (
     <button
@@ -159,6 +163,9 @@ export function Week() {
         subtitle={`${fmtWeekRange(start)} · ${weekTodo} tâche(s) à faire`}
         right={
           <div className="flex flex-wrap items-center gap-2">
+            <Link to="/planifier" className={`btn btn-sm ${toPlan > 0 ? 'btn-accent' : 'btn-ghost'}`} title="Répartir les prospects sans vidéo prévue">
+              <ListChecks size={14} /> Planifier{toPlan > 0 ? ` (${toPlan})` : ''}
+            </Link>
             <div className="flex items-center gap-1 rounded-lg bg-slate-200/70 p-1">
               {whoBtn('me', me.name)}
               {other && whoBtn('other', other.name)}
@@ -186,7 +193,7 @@ export function Week() {
           </p>
           <ul className="divide-y divide-slate-100">
             {overdue.map((t) => (
-              <TaskRow key={t.id} task={t} onDone={() => void completeTask(t)} />
+              <TaskRow key={t.id} task={t} onDone={() => void completeTask(t)} onMove={move(t)} />
             ))}
           </ul>
         </div>
@@ -212,7 +219,7 @@ export function Week() {
                   <p className="mb-1 text-xs font-semibold text-slate-500">À faire ({sel.todo.length})</p>
                   <ul className="divide-y divide-slate-100">
                     {sel.todo.map((t) => (
-                      <TaskRow key={t.id} task={t} onDone={() => void completeTask(t)} />
+                      <TaskRow key={t.id} task={t} onDone={() => void completeTask(t)} onMove={move(t)} />
                     ))}
                   </ul>
                 </div>
@@ -244,8 +251,8 @@ export function Week() {
 
       <Section title="Bilan de la semaine">
         <div className="grid gap-4 sm:grid-cols-2">
-          <Gauge label="Prospects ajoutés" value={team.prospects} goal={WEEKLY_GOALS.prospects} />
-          <Gauge label="Vidéos envoyées" value={team.videos} goal={WEEKLY_GOALS.videos} />
+          <Gauge label="Prospects ajoutés" value={team.prospects} goal={goals.prospects} />
+          <Gauge label="Vidéos envoyées" value={team.videos} goal={goals.videos} />
         </div>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-sm">

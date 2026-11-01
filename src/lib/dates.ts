@@ -1,4 +1,4 @@
-import { addDays, format, formatDistanceToNowStrict, parseISO, startOfWeek } from 'date-fns'
+import { addDays, format, formatDistanceToNowStrict, isWeekend, parseISO, startOfWeek } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
 export const nowIso = () => new Date().toISOString()
@@ -25,3 +25,10 @@ export const fmtWeekRange = (start: string) => {
   return `${format(a, sameMonth ? 'd' : 'd MMM', { locale: fr })} – ${format(b, 'd MMM yyyy', { locale: fr })}`
 }
 export const fmtTime = (iso: string) => format(parseISO(iso), 'HH:mm')
+export const isWeekendDay = (s: string) => isWeekend(parseISO(s))
+// Prochain jour (à partir de demain) où planifier : saute le week-end si demandé.
+export const nextPlanningDay = (workDaysOnly: boolean) => {
+  let d = plusDays(1)
+  while (workDaysOnly && isWeekendDay(d)) d = shiftDays(d, 1)
+  return d
+}

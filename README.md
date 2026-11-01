@@ -67,7 +67,9 @@ Une **réponse reçue** (bouton sur la fiche) annule les relances restantes et p
 ### Les écrans
 
 - **Aujourd'hui** : mes tâches du jour et en retard, les 7 prochains jours, ce que j'ai fait aujourd'hui, ce qui est chez l'autre.
-- **Semaine** : grille lundi → dimanche avec les tâches à faire (cochables), celles faites et les événements marquants (vidéo envoyée, réponse, RDV, devis, gagné, perdu). Filtre moi / l'autre / les deux, bandeau des retards, détail d'un jour au clic, bilan chiffré par personne et jauges d'objectifs hebdo (`WEEKLY_GOALS` dans `src/lib/status.ts`).
+- **Semaine** : grille lundi → dimanche avec les tâches à faire (cochables), celles faites et les événements marquants (vidéo envoyée, réponse, RDV, devis, gagné, perdu). Filtre moi / l'autre / les deux, bandeau des retards, détail d'un jour au clic, bilan chiffré par personne et jauges d'objectifs hebdo (dérivés du rythme choisi dans Réglages). Chaque tâche peut être déplacée à un autre jour.
+- **Planifier** : liste des prospects sans vidéo prévue. On en coche quelques-uns et on choisit un jour et une personne, ou on clique sur « Répartir automatiquement » (N par jour, à partir de telle date, jours ouvrés ou non) : chaque prospect reçoit une tâche « Vidéo + envoi » datée, visible dans Aujourd'hui, Semaine et sa fiche. Cocher « Fait » sur cette tâche passe le prospect en « Contacté » avec ses relances.
+- **Réglages > Rythme** : vidéos par jour, jours travaillés, prospects par semaine. Propres à l'appareil (localStorage), ils servent de valeurs par défaut à Planifier et d'objectifs à Semaine.
 - **Pipeline** : colonnes par statut, filtres par niche et par personne. Vue liste sur mobile.
 - **Fiche prospect** : prochaine étape (boutons selon le statut), tâches, journal, infos, brief de maquette, liens maquette et vidéo.
 - **Clients** : les prospects gagnés, par étape de production, avec le récurrent mensuel.
